@@ -2,31 +2,31 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
-const Leaders = require('../models/leaders');
+const Promotions = require('../models/promotions');
 var authenticate = require('../authenticate');
 
-const leaderRouter = express.Router();
+const promotionRouter = express.Router();
 
-leaderRouter.use(bodyParser.json());
+promotionRouter.use(bodyParser.json());
 
-leaderRouter.route('/')
+promotionRouter.route('/')
 .get((req, res, next) => {
-    Leaders.find({})
-    .then((leaders) => {
+    Promotions.find({})
+    .then((promos) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        res.json(leaders);
+        res.json(promos);
     },
     (err) => next(err))
     .catch((err) => next(err));
 })
 .post(authenticate.verifyUser, (req, res, next) => {
     if (authenticate.verifyAdmin(req, res, next)) {
-        Leaders.create(req.body)
-        .then((leader) => {
+        Promotions.create(req.body)
+        .then((promo) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
-            res.json(leader);
+            res.json(promo);
         },
         (err) => next(err))
         .catch((err) => next(err));
@@ -35,12 +35,12 @@ leaderRouter.route('/')
 .put(authenticate.verifyUser, (req, res, next) => {
     if (authenticate.verifyAdmin(req, res, next)) {
         res.statusCode = 403;
-        res.end('PUT operation not supported on /leaders');
+        res.end('PUT operation not supported on /promotions');
     }
 })
 .delete(authenticate.verifyUser, (req, res, next) => {
     if (authenticate.verifyAdmin(req, res, next)) {
-        Leaders.remove({})
+        Promotions.remove({})
         .then((resp) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
@@ -50,13 +50,14 @@ leaderRouter.route('/')
         .catch((err) => next(err));
     }
 });
-leaderRouter.route('/:leaderId')
+    
+promotionRouter.route('/:promoId')
 .get((req, res, next) => {
-    Leaders.findById(req.params.leaderId)
-    .then((leader) => {
+    Promotions.findById(req.params.promoId)
+    .then((promo) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        res.json(leader);
+        res.json(promo);
     },
     (err) => next(err))
     .catch((err) => next(err));
@@ -64,28 +65,28 @@ leaderRouter.route('/:leaderId')
 .post(authenticate.verifyUser, (req, res, next) => {
     if (authenticate.verifyAdmin(req, res, next)) {
         res.statusCode = 403;
-        res.end('POST operation not supported on /leaders' + req.params.leaderId);
+        res.end('POST operation not supported on /promotions/' + req.params.promoId);
     }
 })
 .put(authenticate.verifyUser, (req, res, next) => {
     if (authenticate.verifyAdmin(req, res, next)) {
-        Leaders.findByIdAndUpdate(req.params.leaderId, {
+        Promotions.findByIdAndUpdate(req.params.promoId, {
             $set: req.body
         }, {
             new: true
         })
-        .then((leader) => {
+        .then((promo) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
-            res.json(leader);
+            res.json(promo);
         },
         (err) => next(err))
         .catch((err) => next(err));
     }
 })
 .delete(authenticate.verifyUser, (req, res, next) => {
-    if (authenticate.verifyAdmin(req, res, next)) {       
-        Leaders.findByIdAndRemove(req.params.leaderId)
+    if (authenticate.verifyAdmin(req, res, next)) {
+        Promotions.findByIdAndRemove(req.params.promoId)
         .then((resp) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
@@ -96,5 +97,4 @@ leaderRouter.route('/:leaderId')
     }
 });
 
-
-module.exports = leaderRouter;
+module.exports = promotionRouter;
