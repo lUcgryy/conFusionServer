@@ -7,15 +7,13 @@ var authenticated = require('../authenticate');
 
 router.use(bodyParser.json());
 /* Lists all users. */
-router.get('/', authenticated.verifyUser, (req, res, next) => {
-  if (authenticated.verifyAdmin(req, res, next)) {
-    User.find({})
-      .then((users) => {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(users);
-      }).catch((err) => next(err));
-  }
+router.get('/',authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+  User.find({})
+    .then((users) => {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json(users);
+    }).catch((err) => next(err));
 });
 
 router.post('/signup', (req, res, next) => {
