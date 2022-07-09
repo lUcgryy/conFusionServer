@@ -7,7 +7,7 @@ var authenticated = require('../authenticate');
 
 router.use(bodyParser.json());
 /* Lists all users. */
-router.get('/',authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+router.get('/',authenticated.verifyUser, authenticated.verifyAdmin, (req, res, next) => {
   User.find({})
     .then((users) => {
       res.statusCode = 200;
