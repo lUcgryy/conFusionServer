@@ -4,10 +4,11 @@ var passport = require('passport');
 const bodyParser = require('body-parser');
 var User = require('../models/users');
 var authenticated = require('../authenticate');
+const cors = require('./cors');
 
 router.use(bodyParser.json());
 /* Lists all users. */
-router.get('/',authenticated.verifyUser, authenticated.verifyAdmin, (req, res, next) => {
+router.get('/', cors.corsWithOptions, authenticated.verifyUser, authenticated.verifyAdmin, (req, res, next) => {
   User.find({})
     .then((users) => {
       res.statusCode = 200;
@@ -16,7 +17,7 @@ router.get('/',authenticated.verifyUser, authenticated.verifyAdmin, (req, res, n
     }).catch((err) => next(err));
 });
 
-router.post('/signup', (req, res, next) => {
+router.post('/signup', cors.corsWithOptions,  (req, res, next) => {
   username = req.body.username;
   User.register(new User({ username: username }), req.body.password, (err, user) => {
     if (err) {
@@ -47,14 +48,14 @@ router.post('/signup', (req, res, next) => {
   });
 });
 
-router.post('/login', passport.authenticate('local'), (req, res) => {
+router.post('/login', cors.corsWithOptions,  passport.authenticate('local'), (req, res) => {
   var token = authenticated.getToken({ _id: req.user._id });
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
   res.json({ success: true, token: token, status: 'You are successfully logged in!' });
 });
 
-router.get('/logout', (req, res) => {
+router.get('/logout', cors.corsWithOptions,  (req, res) => {
   if (req.session) {
     req.session.destroy();
     res.clearCookie('session-id');
@@ -64,6 +65,15 @@ router.get('/logout', (req, res) => {
     var err = new Error('You are not logged in');
     err.status = 403;
     next(err);
+  }
+});
+
+router.get('/facebook/token', passport.authenticate('facebook-token'), (req, res) => {
+  if (req.user) {
+    var token = authenticated.getToken({ _id: req.user._id });
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.json({ success: true, token: token, status: 'You are successfully logged in!' });
   }
 });
 
